@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>เพิ่มคำตอบนักเรียน</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Sarabun', Arial, sans-serif;
+      margin: 0;
+      display: flex;
+      background: #f5f7fa;
+    }
+
+    nav.sidebar {
+      width: 220px;
+      background: #333;
+      color: #fff;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    nav.sidebar a {
+      display: block;
+      color: #fff;
+      text-decoration: none;
+      margin-bottom: 10px;
+      padding: 10px;
+      background: #444;
+      border-radius: 5px;
+    }
+
+    nav.sidebar a:hover {
+      background: #555;
+    }
+
+    main.content {
+      flex: 1;
+      padding: 20px;
+      overflow-x: auto;
+    }
+
+    .form-container {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      margin-bottom: 20px;
+    }
+
+    h1,
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    .score-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    .score-table th,
+    .score-table td {
+      border: 1px solid #ccc;
+      padding: 5px;
+      text-align: center;
+    }
+
+    button {
+      margin-top: 20px;
+      width: 100%;
+      background-color: #3b5bdb;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: opacity 0.3s;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+
+    /* 🎨 การ์ดเลือกโหมด */
+    .mode-options {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .mode-card {
+      flex: 1;
+      background: #f8f9fa;
+      border: 2px solid #ddd;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .mode-card:hover {
+      border-color: #3b5bdb;
+      background: #eef2ff;
+    }
+
+    .mode-card.active {
+      border-color: #3b5bdb;
+      background: #dbe4ff;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+
+<body>
+  <nav class="sidebar">
+    <h2>เมนู</h2>
+    <a href="homepage_admin.html">HOME PAGE</a>
+    <a href="manage_user.html">จัดการผู้ใช้งาน</a>
+    <a href="create_answer.html">เพิ่มคำตอบนักเรียน</a>
+    <a href="show_answer.html">ตรวจสอบคำตอบนักเรียน</a>
+    <a href="view_feedback.html">ตรวจสอบความคิดเห็นของผู้ใช้งาน</a>
+    <a href="login.html">ออกจากระบบ</a>
+  </nav>
+
+  <main class="content">
+    <div class="form-container">
+      <h1>เพิ่มคำตอบนักเรียน</h1>
+      <p style="text-align:center; font-weight:bold;">เลือกวิธีการเพิ่มคำตอบ</p>
+      <div class="mode-options">
+        <div class="mode-card" data-mode="manual">
+          <h3>📝 กรอกเอง</h3>
+          <p>กรอกคำตอบทีละคน พร้อมใส่คะแนนครู</p>
+        </div>
+        <div class="mode-card" data-mode="upload">
+          <h3>📂 อัปโหลดไฟล์</h3>
+          <p>อัปโหลด CSV/Excel เพื่อเพิ่มคำตอบหลายรายการ</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Form กรอกเอง -->
+    <div class="form-container" id="manualForm" style="display:none;">
+      <h2>กรอกคำตอบนักเรียน</h2>
+      <form id="answerForm">
+        <label>รหัสนักเรียน</label>
+        <input type="number" name="student_id" required>
+
+        <label>ระดับชั้นเรียน</label>
+        <select name="group_id" required>
+          <option value="">-- เลือก --</option>
+          <option value="P6">ประถมศึกษาปีที่ 6</option>
+          <option value="M3">มัธยมศึกษาปีที่ 3</option>
+        </select>
+
+        <label>ปีการสอบ</label>
+        <input type="number" name="exam_year" required>
+
+        <label>คำตอบข้อที่ 1</label>
+        <textarea name="essay_text" rows="3" required></textarea>
+
+        <label>คำตอบข้อที่ 2</label>
+        <textarea name="essay_analysis" rows="3" required></textarea>
+
+        <h3>คะแนนครูผู้ตรวจ</h3>
+        <table class="score-table">
+          <thead>
+            <tr>
+              <th>หัวข้อ</th>
+              <th>ครูคนที่ 1</th>
+              <th>ครูคนที่ 2</th>
+            </tr>
+          </thead>
+          <tbody id="scoreTableBody"></tbody>
+        </table>
+
+        <button type="submit">บันทึกคำตอบ</button>
+      </form>
+      <p id="messageForm" style="margin-top:10px;"></p>
+    </div>
+
+    <!-- ✅ Form อัปโหลดไฟล์ -->
+    <div class="form-container" id="uploadFormBox" style="display:none;">
+      <h2>อัปโหลดคำตอบจากไฟล์</h2>
+      <form id="uploadForm" enctype="multipart/form-data">
+        <label>เลือกไฟล์ (CSV หรือ Excel)</label>
+        <input type="file" name="file" accept=".csv,.xlsx" required>
+        <button type="submit">อัปโหลดไฟล์</button>
+      </form>
+      <p id="messageUpload" style="margin-top:10px;"></p>
+      <p style="color: gray; font-size: 14px;">
+        - ไฟล์ต้องเป็น <b>.csv</b> หรือ <b>.xlsx</b><br>
+        - ต้องมีคอลัมน์: <b>student_id, group_id, exam_year, essay_text, essay_analysis</b><br>
+        (สามารถใส่ <b>s1_t1 - s13_t2</b> ได้ด้วย)
+      </p>
+    </div>
+  </main>
+
+  <script>
+    const API_BASE = 'http://127.0.0.1:8000';
+
+    // ✅ โหมดเลือกแบบการ์ด
+    const modeCards = document.querySelectorAll('.mode-card');
+    const manualForm = document.getElementById('manualForm');
+    const uploadFormBox = document.getElementById('uploadFormBox');
+
+    modeCards.forEach(card => {
+      card.addEventListener('click', () => {
+        modeCards.forEach(c => c.classList.remove('active'));
+        card.classList.add('active');
+
+        const mode = card.getAttribute('data-mode');
+        manualForm.style.display = mode === 'manual' ? 'block' : 'none';
+        uploadFormBox.style.display = mode === 'upload' ? 'block' : 'none';
+      });
+    });
+
+    // ✅ Mapping หัวข้อคะแนน
+    const scoreMapping = {
+      "s1": "ข้อที่ 1 - ใจความสำคัญ (4 คะแนน)",
+      "s2": "ข้อที่ 1 - การเรียงลำดับและเชื่อมโยงความคิด (2 คะแนน)",
+      "s3": "ข้อที่ 1 - ความถูกต้องตามหลักการเขียนย่อความ (1 คะแนน)",
+      "s4": "ข้อที่ 1 - การสะกดคำ (1 คะแนน)",
+      "s5": "ข้อที่ 1 - การใช้คำ/ถ้อยคำสำนวน (1 คะแนน)",
+      "s6": "ข้อที่ 1 - การใช้ประโยค (1 คะแนน)",
+      "s7": "ข้อที่ 2 - คำบอกข้อคิดเห็น (1 คะแนน)",
+      "s8": "ข้อที่ 2 - เหตุผลสนับสนุน (8 คะแนน)",
+      "s9": "ข้อที่ 2 - การเรียงลำดับและเชื่อมโยงความคิด (3 คะแนน)",
+      "s10": "ข้อที่ 2 - ความถูกต้องตามหลักการแสดงความคิดเห็น (2 คะแนน)",
+      "s11": "ข้อที่ 2 - การสะกดคำ/การใช้ภาษา (2 คะแนน)",
+      "s12": "ข้อที่ 2 - การใช้คำ/ถ้อยคำสำนวน (2 คะแนน)",
+      "s13": "ข้อที่ 2 - การใช้ประโยค (2 คะแนน)"
+    };
+
+    const scoreTableBody = document.getElementById("scoreTableBody");
+    Object.entries(scoreMapping).forEach(([key, label]) => {
+      scoreTableBody.innerHTML += `
+        <tr>
+          <td>${label}</td>
+          <td><input type="number" step="0.5" name="${key}_t1"></td>
+          <td><input type="number" step="0.5" name="${key}_t2"></td>
+        </tr>
+      `;
+    });
+
+    // ✅ Form กรอกเอง
+    const form = document.getElementById('answerForm');
+    const messageForm = document.getElementById('messageForm');
+
+    form?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+
+      data.student_id = parseInt(data.student_id);
+      data.exam_year = parseInt(data.exam_year);
+      data.status = "ยังไม่ได้ตรวจ";
+
+      // ✅ รวมคะแนนครู 2 คนก่อนส่ง
+      const scores_t1 = {}, scores_t2 = {};
+      Object.entries(scoreMapping).forEach(([key]) => {
+        const val_t1 = parseFloat(formData.get(`${key}_t1`));
+        const val_t2 = parseFloat(formData.get(`${key}_t2`));
+        scores_t1[key] = isNaN(val_t1) ? null : val_t1;
+        scores_t2[key] = isNaN(val_t2) ? null : val_t2;
+      });
+      data.scores_t1 = scores_t1;
+      data.scores_t2 = scores_t2;
+
+      try {
+        const res = await fetch(`${API_BASE}/api/answers`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.detail || result.message || 'ไม่สามารถเพิ่มข้อมูลได้');
+
+        messageForm.style.color = 'green';
+        messageForm.textContent = 'เพิ่มคำตอบและคะแนนครูสำเร็จ ✅';
+        form.reset();
+      } catch (err) {
+        messageForm.style.color = 'red';
+        messageForm.textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+      }
+    });
+
+    // ✅ Form อัปโหลดไฟล์
+    const uploadForm = document.getElementById('uploadForm');
+    const messageUpload = document.getElementById('messageUpload');
+
+    uploadForm?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(uploadForm);
+
+      try {
+        const res = await fetch(`${API_BASE}/api/answers/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.detail || result.message || 'อัปโหลดล้มเหลว');
+
+        messageUpload.style.color = 'green';
+        messageUpload.textContent = `อัปโหลดสำเร็จ ✅ เพิ่มแล้ว ${result.inserted} รายการ`;
+        uploadForm.reset();
+      } catch (err) {
+        messageUpload.style.color = 'red';
+        messageUpload.textContent = 'เกิดข้อผิดพลาด: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
+
