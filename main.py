@@ -345,7 +345,6 @@ async def upload_answers(file: UploadFile = File(...)):
 
         for _, row in df.iterrows():
             sid = row["student_id"]
-
             # ถ้าเป็น NaN ให้ข้าม
             if pd.isna(sid):
                 continue
@@ -625,8 +624,10 @@ async def check_answer(answer_id: int):
     cursor = None
     try:
         cursor = conn.cursor()
+        # ✅ 1. ดึงคำตอบนักเรียนจากฐานข้อมูล
         cursor.execute("SELECT essay_text, essay_analysis FROM answer WHERE answer_id = %s", (answer_id,))
         row = cursor.fetchone()
+
         if not row:
             raise HTTPException(status_code=404, detail="ไม่พบคำตอบ")
 
@@ -634,7 +635,6 @@ async def check_answer(answer_id: int):
 
         # 1. เรียก AI และรับผลลัพธ์เป็น Dictionary
         ai_result_dict = evaluate_single_answer(essay_text, essay_analysis)
-        
         # Log ผลดิบไว้เผื่อตรวจสอบในอนาคต
         print("AI raw result for answer_id", answer_id, ":", json.dumps(ai_result_dict, indent=2, ensure_ascii=False))
 
@@ -665,8 +665,11 @@ async def check_answer(answer_id: int):
                 # ดึงข้อมูลจาก top-level dictionary โดยตรง
                 data = results.get(ai_key, {}) 
                 
-                # AI อาจจะส่ง score มาใน key ชื่อ 'score' หรือ 'คะแนน'
-                score = data.get("score", data.get("คะแนน", 0.0))
+                # ✅ S1 ใช้ key "คะแนนรวมใจความ"
+                if s_key == "s1":
+                    score = data.get("คะแนนรวมใจความ", 0.0)
+                else:
+                    score = data.get("score", data.get("คะแนน", 0.0))
                 
                 # ใช้ 'details' เป็น feedback ถ้ามี, ถ้าไม่มีก็ใช้ object ทั้งหมด
                 feedback_data = data.get("details", data)
@@ -677,9 +680,7 @@ async def check_answer(answer_id: int):
                 }
             
             # ดึงคะแนนรวมทั้งหมด
-            total_score_key = "คะแนนรวมทั้งหมด (30 คะแนน)"
-            total_score = results.get(total_score_key, 0.0)
-
+            total_score = results.get("คะแนนรวมทั้งหมด", 0.0)
             return formatted_desc, float(total_score)
 
         # 3. เรียกใช้ฟังก์ชันแปลงค่า
