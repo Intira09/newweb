@@ -704,7 +704,7 @@ def validate_student_answer(student_answer):
         "การย่อความผิดไปจากตัวบทอ่าน": sim_pass,
         "similarity_score": round(sim_score, 3),
         "การยกตัวอย่าง": check_examples(student_answer, example_phrases),
-        "การใช้คำวรรพนามบุรษที่ 1 หรือ 2": check_pronouns(student_answer, pronouns_1_2),
+        "การใช้คำสรรพนามบุรษที่ 1 หรือ 2": check_pronouns(student_answer, pronouns_1_2),
         "การใช้อักษรย่อหรือคำย่อ": check_abbreviations(student_answer),
         "การเขียนชื่อเรื่อง": check_title(student_answer),
     }
@@ -1214,18 +1214,53 @@ def evaluate_student_answer8(student_answer, articles, main_ideas, local_words):
 
 
 #------------------S9 การเรียงลำดับ --------------------
+ignore_list_s9 = ["สื่อ", "สื่อออนไลน์", "สื่อสังคม", "สื่อสังคมออนไลน์",
+               "ออนไลน์", "ออนไลท์", "\n", "ในบ้าน", "ในรูปแบบ",
+               "การใช้", "เด็กชายA", "ที่ดี", "ให้แก่", "หากเรา",
+               "ได้อย่าง", "ในการ", "เราก็", "อย่างรวดเร็ว", "ในทาง",
+               "ได้ด้วย", "ก็มี", "ที่ไม่", "หรือจะ", "ในปัจจุบัน", "สามารถดู",
+               "ก็ไม่", "เช่นการ", "สามารถใช้", "ใช้เพื่อ", "ควรใช้",
+               "ของตน", "ที่", "ไม่ควร", "จึง", "ควร", "เรา", "ใช้อย่าง", "ชาชีพ",
+               "นั้นสามารถ", "อีกมากมาย", "นั้นใช้", "การนำเสนอ", "ก็จะ", "ถ้าใช้",
+               "อยากจะ", "ก็ทำได้", "สังคมเป็น", "ช่วยให้", "เข้าถึงได้", "หรือ",
+               "อย่างมาก", "ในทุกวันนี้", "ต่างๆ", "เพราะ", "อาจ", "เข้ามาช่วยทำงานในด้าน" ,
+               "ช่วย","ใน", "ตรงไปตรงมา", "เกิดประโยชน์", "แก่สังคม", "จะทำให้", "สือ",
+               "มีการ", "ไม่รู้","ความ", "ไม่น้อย", "คือ", "ไหน", "แก่", "ตนเอง",
+               "ซื้อของ", "ตรวจสอบว่า","ได้ง่าย", "ค้นคว้า", "ข้อมูล", "กลุ่มแชท",
+               "การเล่น", "ด้วยเช่นกัน", "ให้กับ", "และ", "มีทั้ง", "เช่น", "คน",
+               "ปรโยชน์", "อะไรได้", "สมัยนี้มี", "สังคมส่วนรวม", "ตามโฆษณา", "ไม่มี",
+               "ให้ดี", "ทำอะไร", "เค้า", "ซี", "แอป", "ผิดการ",
+               "มีด้าน", "จะได้", "ได้ไม่ต้อง", "โดยไม่", "เป็นสิ่ง", "ไม่ดี",
+               "คุยกับเพื่อน", "บางกลุ่ม", "โทษต่อ", "อย่างระมัดระวัง",
+               "คุย", "เพื่อน", "โพช", "เช็กให้"]
+
+specific_terms_s9 = []
+
+ignore_single_char_s9 = ["สิ", "สี่", "สัญญา", "ผิดก", "หริ", "รู", "ภูมิ",
+                      "เจ", "คา", "เป้", "เสีย", "หาย", "ผิด", "ที",
+                      "สี" , "ริ" , "ข่อ" , "ออนไลน์", "โท", "ต่อ", "ใส",
+                      "ข่า", "แอ", "ยุค", "หลาย", "ฮิต", "ทู",
+                      "บุ", "ยี่", "มาก", "ทำได้", "ตน", "เขา",
+                      "ควร", "ดัก", "กรู", "กลุ่ม", "เด็ก", "โคล", "มั่ว", "คน",
+                      "อย่า", "รู้", "รี", "โพ", "เฉย", "เยอ", "ดี", "ติ",
+                      "ลื่อ", "ดี", "เทคโนโลยี", "กุ", "ผู้อื่น", "เสียหาย",
+                      "สิ้น", "ค้น", "คอ", "หลอ"]  # คำเดี่ยวที่ไม่ถือว่าผิด
+
+
 def evaluate_ordering_and_coherence(student_text,
-                                    ignore_list=None,
-                                    specific_terms=None,
-                                    ignore_single_char=None,
+                                    ignore_list_s9=None,
+                                    specific_terms_s9=None,
+                                    ignore_single_char_s9=None,
                                     similarity_threshold=0.3):
-    if ignore_list is None:
-        ignore_list = []
-    if specific_terms is None:
-        specific_terms = []
+    if ignore_list_s9 is None:
+        ignore_list_s9 = []
+    if specific_terms_s9 is None:
+        specific_terms_s9 = []
+    if ignore_single_char_s9 is None:
+        ignore_single_char_s9 = []
 
     # ตรวจคำเดี่ยว
-    single_char_words, special_violations = check_thai_text_integrity(student_text, ignore_single_char)
+    single_char_words, special_violations = check_thai_text_integrity(student_text, ignore_single_char_s9)
     missing_content = {
         "single_char_words": single_char_words,
         "special_violations": special_violations
@@ -1234,15 +1269,15 @@ def evaluate_ordering_and_coherence(student_text,
     # ตรวจคำซ้ำ
     s_clean = student_text.replace("\n", "")
     tokens = [t for t in word_tokenize(s_clean, keep_whitespace=False) if t.strip()]
-    repeated_ngrams_result = find_repeated_ngrams(tokens, min_len=2, ignore_list=ignore_list)
-    specific_found_result = find_specific_terms(s_clean, specific_terms)
+    repeated_ngrams_result = find_repeated_ngrams(tokens, min_len=2, ignore_list=ignore_list_s9)
+    specific_found_result = find_specific_terms(s_clean, specific_terms_s9)
 
     duplicate_content = {
         "repeated_ngrams": repeated_ngrams_result["repeated_ngrams"],
         "specific_found": specific_found_result["specific_found"]
     }
 
-    # ตรวจความสัมพันธ์
+    # ตรวจความสัมพันธ์ระหว่างบรรทัด
     failed_similarity = semantic_similarity_lines(student_text, threshold=similarity_threshold)
 
     # คำนวณคะแนน
@@ -1263,6 +1298,7 @@ def evaluate_ordering_and_coherence(student_text,
         "เนื้อความไม่สัมพันธ์กัน": failed_similarity,
         "คะแนนรวม": score
     }
+
 
 
 #------------------S10 ความถูกต้องตามหลักการเขียนแสดงความคิดเห็น --------------------
@@ -1337,9 +1373,9 @@ def evaluate_comment_validity(text):
         mistakes.append(f"ใช้สรรพนามบุรุษที่ 1 หรือ 2: {', '.join(pronouns)}")
 
     if mistake_count == 0:
-        score = 1
+        score = 2
     elif mistake_count == 1:
-        score = 0.5
+        score = 1
     else:
         score = 0
 
@@ -1485,7 +1521,7 @@ def detect_split_errors(tokens, custom_words=None, splitable_phrases=None):
 # ---------------------------
 # ฟังก์ชันหลัก S11
 # ---------------------------
-def evaluate_text(text):
+def evaluate_text_s11(text):
     if not text or not text.strip():
         return {'score': 0.0, 'reasons': ["ไม่มีคำตอบ"], 'total_error_count': 0}
 
@@ -1753,16 +1789,17 @@ def evaluate_single_answer(answer_text, essay_analysis):
     mind_score = evaluate_mind_score(answer_text)
     mind_total = int(mind_score.get("คะแนนรวมใจความ", 0))
 
-    # ถ้าใจความเป็น 0 หรือ cosine ต่ำกว่า 0.6 → ตัดจบ
-    if mind_total == 0 or best_score < 0.6:
+    # 🔹 เงื่อนไข (1): ถ้าใจความสำคัญเป็น 0 หรือ cosine >= 0.9 ⇒ S1–S6 = 0 ทั้งหมด
+    if mind_total == 0 or best_score >= 0.9:
         mind_score = {
             "cosine_similarity": round(best_score, 3),
             "ใจความที่ 1": 0,
             "ใจความที่ 2": 0,
             "ใจความที่ 3": 0,
             "ใจความที่ 4": 0,
-            "คะแนนรวม": 0,
-            "message": "ใจความต่ำกว่ามาตรฐาน → ข้อที่ 1 = 0"
+            "คะแนนรวมใจความ": 0,
+            "bert_score": best_score,
+            "message": "ใจความเป็น 0 หรือ cosine >= 0.9 → S1–S6 = 0 ทั้งหมด"
         }
         ordering1_score, ordering1_details = 0, {}
         summary1_score, summary1_details = 0, {}
@@ -1820,16 +1857,16 @@ def evaluate_single_answer(answer_text, essay_analysis):
     s8_result = evaluate_student_answer8(essay_analysis, reference_text, core_sentences, local_words_s8)
     s8_score = int(s8_result.get("score_total", 0))
 
-    # 🔴 ถ้าไม่มีคำบอกข้อคิดเห็น (S7=0) และ S8=0 → ข้อที่ 2 = 0 ทั้งข้อ
-    if agreement_score == 0 and s8_score == 0:
+    # 🔹 เงื่อนไข (2.1): ถ้าไม่มีคำบอกข้อคิดเห็น และ เหตุผลสนับสนุน = 0 → ข้อที่ 2 = 0 ทั้งข้อ
+    if (agreement_result.get("found_word") == "ไม่พบ" and s8_score == 0) or (s8_score == 0):
         return convert_numpy_to_python({
             "ข้อที่ 1": {
                 "ใจความสำคัญ": mind_score,
                 "เรียงลำดับ": {"score": ordering1_score, "details": ordering1_details},
                 "ความถูกต้องย่อความ": {"score": summary1_score, "details": summary1_details},
                 "การสะกดคำ": {"score": spelling_score, "details": spelling_res},
-                "การใช้คำ/ถ้อยคำสำนวน": {"score": score_s5,"details": s5_result},
-                "การใช้ประโยค": {"score": score_s6,"details": s6_result},
+                "การใช้คำ/ถ้อยคำสำนวน": {"score": score_s5, "details": s5_result},
+                "การใช้ประโยค": {"score": score_s6, "details": s6_result},
                 "คะแนนรวมข้อที่ 1": total_score1
             },
             "ข้อที่ 2": {
@@ -1840,25 +1877,50 @@ def evaluate_single_answer(answer_text, essay_analysis):
             "คะแนนรวมทั้งหมด": total_score1
         })
 
+    # 🔹 เงื่อนไข (2.2): ตรวจจำนวนบรรทัด essay_analysis ถ้ามี ≤ 2 → ตรวจแค่ S7–S8, ที่เหลือเป็น 0
+    line_count = essay_analysis.count("\n") + 1
+    if (line_count >= 1 and line_count <= 2):
+        ordering2_score = 0
+        ordering2_details = {}
+        comment_validity_score = 0
+        comment_validity_details = {}
+        score_s11 = 0
+        s11_result = {}
+        score_s12 = 0
+        s12_result = {}
+        score_s13 = 0
+        s13_result = {}
+        total_score2 = agreement_score + s8_score
+        total_all = total_score1 + total_score2
+
+        return convert_numpy_to_python({
+            "ข้อที่ 1 - ใจความสำคัญ": {"cosine_similarity": round(best_score, 3), **mind_score, "คะแนนรวมใจความ": mind_total, "bert_score": round(best_score, 3)},
+            "ข้อที่ 2 - คำบอกข้อคิดเห็น": agreement_result,
+            "ข้อที่ 2 - เหตุผลสนับสนุน": s8_result,
+            "message": "essay_analysis มีเพียง 1–2 บรรทัด → ตรวจเฉพาะ S7–S8, S9–S13 = 0",
+            "คะแนนรวมข้อที่ 1": total_score1,
+            "คะแนนรวมข้อที่ 2": total_score2,
+            "คะแนนรวมทั้งหมด": total_all
+        })
 
     # 3) เรียงลำดับความคิด
     ordering2_result = evaluate_ordering_and_coherence(
         essay_analysis,
-        ignore_list=ignore_list,
-        specific_terms=specific_terms,
-        ignore_single_char=ignore_single_char,
+        ignore_list_s9=ignore_list_s9,
+        specific_terms_s9=specific_terms_s9,
+        ignore_single_char_s9=ignore_single_char_s9,
         similarity_threshold=0.3
     )
     ordering2_score = int(ordering2_result.get("คะแนนรวม", 0))
     ordering2_details = convert_numpy_to_python(ordering2_result)
 
     # 4) ความถูกต้องตามหลักการแสดงความคิดเห็น
-    summary2_score, summary2_err, summary2_details = validate_student_answer(essay_analysis)
-    summary2_score = int(summary2_score)
-    summary2_details = convert_numpy_to_python(summary2_details)
+    comment_validity_result = evaluate_comment_validity(essay_analysis)
+    comment_validity_score = float(comment_validity_result.get("score", 0))
+    comment_validity_details = convert_numpy_to_python(comment_validity_result)
 
     # 5) การสะกดคำ 
-    s11_result = evaluate_text(essay_analysis)
+    s11_result = evaluate_text_s11(essay_analysis)
     score_s11 = float(s11_result.get("score", 0))
 
     # 6) การใช้คำ/ถ้อยคำสำนวน (S12)
@@ -1872,35 +1934,32 @@ def evaluate_single_answer(answer_text, essay_analysis):
     score_s12 = float(s12_result.get("score", 0))
 
     # 7) การใช้ประโยค (S13)
-    s13_result = evaluate_reasoning_usage(answer_text)
+    s13_result = evaluate_reasoning_usage(essay_analysis)
     score_s13 = float(s13_result.get("score", 0))
 
     # ✅ รวมคะแนน
-    total_score2 = agreement_score + s8_score + ordering2_score + summary2_score  + score_s11 + score_s12 + score_s13
+    total_score2 = agreement_score + s8_score + ordering2_score + comment_validity_score + score_s11 + score_s12 + score_s13
     total_all = total_score1 + total_score2
 
     # ---------------------------
     # ✅ คืนค่า JSON-safe
     # ---------------------------
     return convert_numpy_to_python({
-        # -------- ข้อที่ 1 --------
-        "ข้อที่ 1 - ใจความสำคัญ": {**mind_score, "คะแนนรวม": mind_total},
-        "ข้อที่ 1 - การเรียงลำดับและเชื่อมโยงความคิด": {"score": ordering1_score,"details": ordering1_details},
+        "ข้อที่ 1 - ใจความสำคัญ": {"cosine_similarity": round(best_score, 3), **mind_score, "คะแนนรวมใจความ": mind_total, "bert_score": round(best_score, 3)},
+        "ข้อที่ 1 - การเรียงลำดับและเชื่อมโยงความคิด": {"score": ordering1_score, "details": ordering1_details},
         "ข้อที่ 1 - ความถูกต้องตามหลักการเขียนย่อความ": {"score": summary1_score, **summary1_details},
         "ข้อที่ 1 - การสะกดคำ": {"score": spelling_score, "details": spelling_res},
         "ข้อที่ 1 - การใช้คำ/ถ้อยคำสำนวน": {"score": score_s5, "details": s5_result},
         "ข้อที่ 1 - การใช้ประโยค": {"score": score_s6, "details": s6_result},
 
-        # -------- ข้อที่ 2 --------
         "ข้อที่ 2 - คำบอกข้อคิดเห็น": agreement_result,
         "ข้อที่ 2 - เหตุผลสนับสนุน": s8_result,
-        "ข้อที่ 2 - การเรียงลำดับและเชื่อมโยงความคิด": {"score": ordering2_score,"details": ordering2_details},
-        "ข้อที่ 2 - ความถูกต้องตามหลักการแสดงความคิดเห็น": {"score": summary2_score, **summary2_details},
+        "ข้อที่ 2 - การเรียงลำดับและเชื่อมโยงความคิด": {"score": ordering2_score, "details": ordering2_details},
+        "ข้อที่ 2 - ความถูกต้องตามหลักการแสดงความคิดเห็น": {"score": comment_validity_score, "details": comment_validity_details},
         "ข้อที่ 2 - การสะกดคำ/การใช้ภาษา": s11_result,
-        "ข้อที่ 2 - การใช้คำ/ถ้อยคำสำนวน": {"score": score_s12,"details": s12_result},
-        "ข้อที่ 2 - การใช้ประโยค": {"score": score_s13,"details": s13_result},
+        "ข้อที่ 2 - การใช้คำ/ถ้อยคำสำนวน": {"score": score_s12, "details": s12_result},
+        "ข้อที่ 2 - การใช้ประโยค": {"score": score_s13, "details": s13_result},
 
-        # -------- รวมคะแนน --------
         "คะแนนรวมข้อที่ 1": total_score1,
         "คะแนนรวมข้อที่ 2": total_score2,
         "คะแนนรวมทั้งหมด": total_all
