@@ -256,7 +256,7 @@
             <p><strong>ชั้นเรียน:</strong> <span id="groupId">-</span></p>
             <p><strong>ปีการศึกษา:</strong> <span id="examYear">-</span></p>
             <p><strong>สถานะ:</strong> <span id="status" class="status">-</span></p>
-            <p><strong>คะแนนรวม AI:</strong> <span id="totalScoreAI" class="score">0</span></p>
+            <p><strong>คะแนนรวม:</strong> <span id="totalScoreAI" class="score">0</span></p>
           </div>
           <h2>📝 คำตอบนักเรียน</h2>
           <div class="info-section">
@@ -270,7 +270,7 @@
             <thead>
               <tr>
                 <th style="width: 350px;">เกณฑ์การตรวจ</th>
-                <th class="score-cell" style="width: 100px;">คะแนน AI</th>
+                <th class="score-cell" style="width: 100px;">คะแนน</th>
                 <th class="score-cell" style="width: 100px;">ครู 1</th>
                 <th class="score-cell" style="width: 100px;">ครู 2</th>
                 <th>รายละเอียด (Feedback)</th>
@@ -350,7 +350,7 @@
           }
         });
 
-        console.log("📊 คะแนนรวม AI:", totalAIScore);
+        console.log("📊 คะแนนรวม:", totalAIScore);
         document.getElementById("totalScoreAI").textContent = totalAIScore.toFixed(1);
 
 
@@ -452,14 +452,17 @@
             if (teacher2 !== '-') totals.teacher2[part] += parseFloat(teacher2);
 
             let details = "-";
-            if (criteriaData.feedback) {
-              try {
-                const feedbackObj = JSON.parse(criteriaData.feedback);
-                details = JSON.stringify(feedbackObj, null, 2);
-              } catch (e) {
-                details = criteriaData.feedback;
+              if (criteriaData.feedback || criteriaData.details) {
+                try {
+                  const feedbackObj = typeof criteriaData.feedback === "string"
+                    ? JSON.parse(criteriaData.feedback)
+                    : criteriaData.feedback || criteriaData.details;
+
+                  details = JSON.stringify(feedbackObj, null, 2);
+                } catch (e) {
+                  details = JSON.stringify(criteriaData.feedback || criteriaData.details, null, 2);
+                }
               }
-            }
 
             const row = document.createElement("tr");
             row.innerHTML = `
