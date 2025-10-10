@@ -188,6 +188,9 @@
         </select>
       </label>
       <button onclick="loadStudentData()">ดูผล</button>
+
+      <!-- ✅ เพิ่มบรรทัดนี้ -->
+      <button onclick="downloadCSV()">📥 ดาวน์โหลดคะแนนที่ตรวจแล้วทั้งหมด (CSV)</button>
     </div>
 
     <p><strong>รหัสนักเรียน:</strong> <span id="studentId"></span></p>
@@ -290,7 +293,6 @@
         alert("กรุณาเลือกนักเรียน");
         return;
       }
-
       try {
         const res = await fetch(`http://127.0.0.1:8000/api/view-score/${answerId}`);
         if (!res.ok) throw new Error("ไม่สามารถโหลดข้อมูลได้");
@@ -502,7 +504,45 @@
         alert("เกิดข้อผิดพลาด: " + error.message);
       }
     }
+    async function downloadCSV() {
+      const examYear = localStorage.getItem("exam_year");
+      const examGrade = localStorage.getItem("exam_grade");
+
+      if (!examYear || !examGrade) {
+        alert("⚠️ กรุณาเลือกปีการศึกษาและระดับชั้นก่อนดาวน์โหลด");
+        return;
+      }
+
+      // ✅ แปลงชื่อชั้นเรียนให้ตรงกับฐานข้อมูล เช่น M3, P6
+      const groupMap = {
+        "ประถมศึกษาปีที่ 6": "P6",
+        "มัธยมศึกษาปีที่ 3": "M3"
+      };
+      const groupId = groupMap[examGrade] || examGrade;
+
+      try {
+        const res = await fetch(
+          `http://127.0.0.1:8000/api/download-checked-csv?exam_year=${examYear}&group_id=${groupId}`
+        );
+        if (!res.ok) throw new Error("ไม่สามารถดาวน์โหลดไฟล์ได้");
+
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `checked_scores_${groupId}_${examYear}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      } catch (err) {
+        alert("❌ ดาวน์โหลดไม่สำเร็จ: " + err.message);
+      }
+    }
+
+
+
   </script>
+  
 </body>
 
 </html>
