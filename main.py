@@ -4,6 +4,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import psycopg2,psycopg2.extras
 from datetime import datetime
+from fastapi.responses import StreamingResponse
+import io, csv
 import bcrypt
 import os
 import re
@@ -538,6 +540,89 @@ async def create_answer(answer: AnswerWithScore):
             cursor.close()
 
 
+# ✅ ดาวน์โหลด CSV เฉพาะคำตอบที่ตรวจแล้ว (ตามปีการศึกษาและระดับชั้น)
+@app.get("/api/download-checked-csv")
+async def download_checked_csv(exam_year: int, group_id: str):
+    import re
+    try:
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT exam_year, group_id, student_id, score, description
+            FROM answer
+            WHERE status = 'ตรวจแล้ว' AND exam_year = %s AND group_id = %s
+            ORDER BY student_id
+        """, (exam_year, group_id))
+        rows = cursor.fetchall()
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        header = ["exam_year", "group_id", "student_id", "score"] + [f"s{i}_score" for i in range(1, 14)]
+        writer.writerow(header)
+
+        for row in rows:
+            s_scores = [""] * 13
+            desc_raw = row.get("description")
+
+            if desc_raw:
+                try:
+                    # ✅ บางฐานข้อมูล description อาจเป็น str หรือ dict
+                    desc_json = desc_raw if isinstance(desc_raw, dict) else json.loads(desc_raw)
+
+                    for i in range(1, 14):
+                        key = f"s{i}"
+                        if key not in desc_json:
+                            continue
+                        item = desc_json[key]
+
+                        # เริ่มจากชั้นแรก
+                        score_value = item.get("score", "")
+                        fb = item.get("feedback")
+
+                        # ✅ ตรวจชนิด feedback
+                        fb_json = None
+                        if isinstance(fb, str):
+                            try:
+                                fb_json = json.loads(fb)
+                            except Exception:
+                                # บางครั้ง feedback เป็นข้อความปกติ ไม่ใช่ JSON
+                                fb_json = None
+                        elif isinstance(fb, dict):
+                            fb_json = fb
+
+                        # ✅ พยายามดึงคะแนนจาก feedback ถ้ามี
+                        if fb_json:
+                            for k in ["คะแนนรวม", "คะแนนรวมใจความ", "score_total", "score"]:
+                                if k in fb_json and isinstance(fb_json[k], (int, float)):
+                                    score_value = fb_json[k]
+                                    break
+
+                        # ✅ ถ้ายังไม่มีคะแนน ลองค้นหาใน string JSON
+                        if (score_value == "" or score_value is None) and isinstance(fb, str):
+                            match = re.search(r'"score"\s*:\s*([0-9.]+)', fb)
+                            if match:
+                                score_value = float(match.group(1))
+
+                        s_scores[i - 1] = score_value
+                except Exception as e:
+                    print("⚠️ parse error:", e)
+
+            writer.writerow([
+                row["exam_year"],
+                row["group_id"],
+                row["student_id"],
+                row.get("score", ""),
+                *s_scores
+            ])
+
+        output.seek(0)
+        headers = {
+            "Content-Disposition": f"attachment; filename=checked_scores_{group_id}_{exam_year}.csv",
+            "Content-Type": "text/csv"
+        }
+        return StreamingResponse(iter([output.getvalue()]), headers=headers)
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -712,6 +797,8 @@ async def check_answer(answer_id: int):
     finally:
         if cursor:
             cursor.close()
+
+
 
 
 # -----------------------------
