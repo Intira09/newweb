@@ -27,7 +27,7 @@ model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 BASE_DIR = os.path.dirname(__file__)  # โฟลเดอร์ปัจจุบัน
 
 # ---- thai_loanwords ----
-json_path = os.path.join(BASE_DIR, "data", "thai_loanwords_new_update.json")
+json_path = os.path.join(BASE_DIR, "data", r"C:\\aim\\test_web\\data\\thai_loanwords_new_update(1) (3).json")
 try:
     with open(json_path, "r", encoding="utf-8") as f:
         thai_loanwords = json.load(f)
@@ -40,7 +40,7 @@ except FileNotFoundError:
     loanwords_whitelist = set()
 
 # ---- common misspellings ----
-misspellings_path = os.path.join(BASE_DIR, "data", "update_common_misspellings.json")
+misspellings_path = os.path.join(BASE_DIR, "data", r"C:\\aim\\test_web\\data\\update_common_misspellings (1) (1).json")
 
 try:
     with open(misspellings_path, "r", encoding="utf-8") as f:
@@ -93,9 +93,12 @@ def find_keywords_list(text, keywords):
 
 def score_group_1(text):
     text_norm = normalize_text(text)
+
+    
     media_keywords = ["สื่อสังคมออนไลน์", "สื่อสังคม", "สื่อออนไลน์"]
     usage_keywords = ["เป็นช่องทาง", "ช่องทาง", "เป็นการแพร่กระจาย", "เป็นสื่อ", "สามารถ", "ทำให้", "เป็นการกระจาย", "นั้น"]
     last_keywords = ["แพร่กระจาย", "แพร่กระจายข่าวสาร", "ค้นหา", "รับข้อมูลข่าวสาร", "เผยแพร่", "ติดต่อสื่อสาร", "กระจาย", "รับสาร","รับรู้"]
+
 
     found_usage = [kw for kw in usage_keywords if kw.replace(" ", "") in text_norm]
     found_last = [kw for kw in last_keywords if kw.replace(" ", "") in text_norm]
@@ -108,6 +111,8 @@ def score_group_1(text):
 
 def score_group_2(text):
     text_norm = normalize_text(text)
+
+    
     keypoints_1 = ["ไม่ระวัง", "ไม่ระมัดระวัง", "ขาดความรับผิดชอบ", "ควรระมัดระวัง", "ใช้ในทางที่ไม่ดี", "ไม่เหมาะสม", "อย่างระมัดระวัง", "ไตร่ตรอง"]
     keypoints_2 = [
         "โทษ", "ผลเสีย", "ข้อเสีย", "เกิดผลกระทบ", "สิ่งไม่ดี",
@@ -117,18 +122,23 @@ def score_group_2(text):
         "ตกเป็นเหยื่อของมิจฉาชีพ",
         "ตกเป็นเหยื่อมิจฉาชีพ", "ตกเป็นเหยื่อทางการตลาด"
     ]
+
+
     found_1 = find_keywords_list(text_norm, keypoints_1)
     found_2 = find_keywords_list(text_norm, keypoints_2)
-    found_illegal = "ผิดกฎหมาย" in text_norm
+    #found_illegal = "ผิดกฎหมาย" in text_norm
 
-    score = 1 if (found_1 and found_2) or (found_1 and found_illegal and found_2) else 0
+    #score = 1 if (found_1 and found_2) or (found_1 and found_illegal and found_2) else 0
+    score = 1 if (found_1 and found_2) or (found_1 and found_2) else 0
     return score
 
 def score_group_3(text):
     text_norm = normalize_text(text)
+
     media_keypoint = ["สื่อสังคมออนไลน์", "สื่อสังคม", "สื่อออนไลน์"]
     keypoints = ["รู้เท่าทัน", "รู้ทัน", "ผู้ใช้ต้องรู้เท่าทัน", "รู้ทันสื่อสังคม",
                  "รู้เท่าทันสื่อ", "รู้ทันสื่อ", "สร้างภูมิคุ้มกัน", "ไม่ตกเป็นเหยื่อ", "แก้ปัญหาการตกเป็นเหยื่อ"]
+
 
     found_1 = find_keywords_list(text_norm, media_keypoint)
     found_2 = find_keywords_list(text_norm, keypoints)
@@ -138,6 +148,8 @@ def score_group_3(text):
 
 def score_group_4(text):
     text_norm = normalize_text(text)
+
+    
     media_use_keywords = [
         "ใช้สื่อสังคม", "ใช้สื่อออนไลน์", "ใช้สื่อสังคมออนไลน์", "การใช้สื่อ"
     ]
@@ -147,6 +159,8 @@ def score_group_4(text):
         "ความน่าเชื่อถือของข่าวสาร", "ความน่าเชื่อถือของข้อมูลข่าวสาร", "ความน่าเชื่อถือของข้อมูล",
         "มีสติ", "ความน่าเชื่อถือ", "ความเชื่อถือของข้อมูลข่าวสาร", "ข้อมูลข่าวสาร"
     ]
+
+
     words = text.split()
 
     def find_positions(words, keywords):
@@ -644,8 +658,8 @@ TNER_URL = 'https://api.aiforthai.in.th/tner'
 
 
 # ---------- โหลด Dataset ----------
-examples_df = pd.read_csv(r'D:\new_project\example_dialect (3).csv')
-pronouns_df = pd.read_csv(r'D:\new_project\personal_pronoun (1).csv')
+examples_df = pd.read_csv(r'C:\\aim\\test_web\\example_dialect (3).csv')
+pronouns_df = pd.read_csv(r'C:\\aim\\test_web\\personal_pronoun (1).csv')
 
 example_phrases = examples_df['local_word'].dropna().tolist()
 pronouns_1 = pronouns_df['personal pronoun 1'].dropna().tolist()
@@ -721,7 +735,7 @@ def validate_student_answer(student_answer):
 fill_mask = pipeline("fill-mask", model="xlm-roberta-base", tokenizer="xlm-roberta-base")
 
 # API Key
-API_KEY = "pHeDDSTgNpK4jLxoHXDQsdt3b9LC5yRL"
+API_KEY = ""
 
 def call_tner(text):
     url = "https://api.aiforthai.in.th/tner"
@@ -760,14 +774,14 @@ def normalize_word(w):
     return w.replace("\n", "").replace("\r", "").replace(" ", "").lower()
 
 # โหลด dataset
-file_path = r"D:\new_project\speak_word(in) (1).csv"
+file_path = r"C:\\aim\\test_web\\speak_words(in).csv"
 spoken_words_dataset = pd.read_csv(file_path)["word"].dropna().astype(str).str.strip()
 spoken_words_dataset = [w for w in spoken_words_dataset if w]  # ลบ empty string
 
-notinlan_dataset = pd.read_csv(r"D:\new_project\notinlan_words.csv")["notinlan"].dropna().astype(str).str.strip()
+notinlan_dataset = pd.read_csv(r"C:\\aim\\test_web\\notinlan_words.csv")["notinlan"].dropna().astype(str).str.strip()
 notinlan_dataset = [w for w in notinlan_dataset if w]
 
-local_words_context = pd.read_csv(r"D:\new_project\sample_local_dialect  (1)(in).csv")["local_word"].dropna().astype(str).str.strip()
+local_words_context = pd.read_csv(r"C:\\aim\\test_web\\sample_local_dialect(1)(in).csv")["local_word"].dropna().astype(str).str.strip()
 local_words_context = [w for w in local_words_context if w]
 
 spoken_words_set = set(normalize_word(w) for w in spoken_words_dataset)
@@ -867,14 +881,14 @@ def evaluate_student_text(student_text, keyword_dict,
 #----------S6 การใช้ประโยค------------
 # ---------------- Typhoon API ----------------
 client = openai.OpenAI(
-    api_key="sk-3u6WAA0DwMjJoJ2xDDxFy2ecuZDKTjUF1mCOCXAJKSlR3Xqq",
+    api_key="",
     base_url="https://api.opentyphoon.ai/v1"
 )
 
 # ---------------- ฟังก์ชัน Typhoon ----------------
 def ask_typhoon(question, document):
     response = client.chat.completions.create(
-        model="typhoon-v2.1-12b-instruct",
+        model="typhoon-v2.5-30b-a3b-instruct", #เปลี่ยนจากเวอร์ชั่น typhoon-v2.1-12b-instruct เป็นเวอร์ชั่นนี้
         messages=[
             {"role": "system", "content": "คุณคือผู้เชี่ยวชาญด้านภาษาไทย"},
             {"role": "user", "content": f"{question} จากประโยค:\n{document}"}
@@ -934,7 +948,7 @@ def ask_typhoon_q2_retry(system_prompt, question, document, wait_sec=3, max_atte
         attempt += 1
         try:
             response = client.chat.completions.create(
-                model="typhoon-v2.1-12b-instruct",
+                model="typhoon-v2.5-30b-a3b-instruct", #เปลี่ยนจากเวอร์ชั่น typhoon-v2.1-12b-instruct เป็นเวอร์ชั่นนี้
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": f"{question}\n{document}"}
@@ -1033,7 +1047,7 @@ def load_local_words_s8(file_path):
         raise ValueError("ไม่พบคอลัมน์ 'local_word' ในไฟล์")
     return [str(x).strip() for x in df["local_word"].dropna().tolist()]
 
-local_words_s8 = load_local_words_s8(r"D:\new_project\example_dialect (3)(in) (1).csv")
+local_words_s8 = load_local_words_s8(r"C:\aim\test_web\example_dialect (3)(in)(1).csv")
 
 def normalize_text(words):
     text = str(words).lower()
@@ -1098,7 +1112,7 @@ def evaluate_student_answer8(student_answer, articles, main_ideas, local_words):
     # -------------------------
     url_ssense = "https://api.aiforthai.in.th/ssense"
     params = {"text": student_answer}
-    headers_ssense = {"Apikey": "zyHC3BNtLiesIuTj2UMlQd8DhrVXBxzM"}
+    headers_ssense = {"Apikey": ""}
     try:
         response_sentiment = requests.get(url_ssense, headers=headers_ssense, params=params, timeout=10)
         sentiment_result = response_sentiment.json()
@@ -1305,8 +1319,8 @@ def evaluate_ordering_and_coherence(student_text,
 
 
 #------------------S10 ความถูกต้องตามหลักการเขียนแสดงความคิดเห็น --------------------
-TNER_API_KEY = 'pHeDDSTgNpK4jLxoHXDQsdt3b9LC5yRL'
-CYBERBULLY_API_KEY = 'pHeDDSTgNpK4jLxoHXDQsdt3b9LC5yRL'
+TNER_API_KEY = ''
+CYBERBULLY_API_KEY = ''
 
 personal_pronoun_1 = {"หนู", "ข้า", "กู"}
 personal_pronoun_2 = {"คุณ", "แก", "เธอ", "ตัวเอง", "เอ็ง", "มึง"}
@@ -1329,18 +1343,35 @@ def check_named_entities(text):
     return False, []
 
 def check_cyberbully(text):
-    url = "https://api.aiforthai.in.th/cyberbully"
+
+    url = "https://api.aiforthai.in.th/bully"
+
     headers = {"Apikey": CYBERBULLY_API_KEY}
-    data = {"text": text}
+
     try:
-        response = requests.post(url, headers=headers, data=data, timeout=8)
+        response = requests.get(
+            url,
+            headers=headers,
+            params={"text": text},   # ใช้ params ให้เหมือนอีกฟังก์ชัน
+            timeout=5                # ไม่ควรเกิน 5 สำหรับเว็บ
+        )
+
         if response.status_code == 200:
             result = response.json()
-            if result.get("bully", "no") == "yes":
-                bully_words = result.get("bully_words") or result.get("bully_phrases") or [text]
-                return True, bully_words
-    except:
-        pass
+
+            bully_word = result.get("bully_word")
+            bully_type = result.get("bully_type")
+
+            if bully_word and bully_word != "None" and bully_type != 0:
+
+                if isinstance(bully_word, list):
+                    return True, bully_word
+                else:
+                    return True, [bully_word]
+
+    except Exception as e:
+        print("Cyberbully error:", e)   # เว็บควร log error
+
     return False, []
 
 def check_personal_pronouns(text):
@@ -1368,7 +1399,9 @@ def evaluate_comment_validity(text):
     bully_flag, bully_words = check_cyberbully(text)
     if bully_flag:
         mistake_count += 1
-        mistakes.append(f"ข้อความลักษณะ Cyberbully: {', '.join(bully_words)}")
+        mistakes.append(
+            f"ข้อความลักษณะ Cyberbully: {', '.join(bully_words)}"
+        )
 
     pronoun_flag, pronouns = check_personal_pronouns(text)
     if pronoun_flag:
@@ -1388,11 +1421,11 @@ def evaluate_comment_validity(text):
     }
 
 #------------------S11 การสะกดคำ (ข้อ 2) --------------------
-with open(r'D:\new_project\thai_loanwords_new_update(1).json', 'r', encoding='utf-8') as f:
+with open(r'C:\aim\test_web\data\thai_loanwords_new_update(1) (3).json', 'r', encoding='utf-8') as f:
      loanwords_data = json.load(f)
      loanwords_whitelist = set(item['thai_word'] for item in loanwords_data)
 
-with open(r'D:\new_project\update_common_misspellings (1).json', 'r', encoding='utf-8') as f:
+with open(r'C:\aim\test_web\data\update_common_misspellings (1) (1).json', 'r', encoding='utf-8') as f:
     raw_data = f.read()
 
 # แทนที่ NaN ด้วย null
@@ -1402,10 +1435,10 @@ data = json.loads(raw_data)
 COMMON_MISSPELLINGS = {item['wrong']: item.get('right') for item in data}
 
 
-with open(r"D:\new_project\splitable_phrases.json", "r", encoding="utf-8") as f:
+with open(r"C:\aim\test_web\splitable_phrases (1).json", "r", encoding="utf-8") as f:
     splitable_phrases = set(json.load(f))
 
-API_KEY = '33586c7cf5bfa0029887a9981bf94963'
+API_KEY = ''
 API_URL = 'https://api.longdo.com/spell-checker/proof'
 
 custom_words = {"ประเทศไทย", "สถาบันการศึกษา", "นานาประการ"}
@@ -1579,13 +1612,13 @@ def evaluate_text_s11(text):
 #------------------S12 การใช้คำ/ถ้อยคำสำนวน (ข้อ 2) --------------------
 
 # Dataset สำหรับ S12 (ข้อ 2)
-spoken_words_dataset_s12 = pd.read_csv(r"D:\new_project\dataset_speak_word(in).csv")["word"].dropna().astype(str).str.strip()
+spoken_words_dataset_s12 = pd.read_csv(r"C:\aim\test_web\dataset_speak_word(in).csv")["word"].dropna().astype(str).str.strip()
 spoken_words_dataset_s12 = [w for w in spoken_words_dataset_s12 if w]  # ลบ empty string
 
-notinlan_dataset_s12 = pd.read_csv(r"D:\new_project\dataset_notinlan_words(in).csv")["notinlan"].dropna().astype(str).str.strip()
+notinlan_dataset_s12 = pd.read_csv(r"C:\aim\test_web\dataset_notinlan_words(in).csv")["notinlan"].dropna().astype(str).str.strip()
 notinlan_dataset_s12 = [w for w in notinlan_dataset_s12 if w]
 
-local_words_context_s12 = pd.read_csv(r"D:\new_project\S12_sample_local_dialect  (1)(in)(in).csv")["local_word"].dropna().astype(str).str.strip()
+local_words_context_s12 = pd.read_csv(r"C:\aim\test_web\S12_sample_local_dialect(1)(in)(in).csv")["local_word"].dropna().astype(str).str.strip()
 local_words_context_s12 = [w for w in local_words_context_s12 if w]
 
 spoken_words_set_s12 = set(normalize_word(w) for w in spoken_words_dataset_s12)
@@ -1797,7 +1830,6 @@ def evaluate_single_answer(answer_text, essay_analysis):
         mind_score = {
             "cosine_similarity": round(best_score, 3), 
             **mind_score, "คะแนนรวมใจความ": mind_total, 
-            "bert_score": round(best_score, 3),
             "message": "ใจความเป็น 0 หรือ cosine >= 0.9 → S1–S6 = 0 ทั้งหมด"
         }
         ordering1_score, ordering1_details = 0, {}
@@ -1913,7 +1945,7 @@ def evaluate_single_answer(answer_text, essay_analysis):
     # ✅ คืนค่า JSON-safe
     # ---------------------------
     return convert_numpy_to_python({
-        "ข้อที่ 1 - ใจความสำคัญ": {"cosine_similarity": round(best_score, 3), **mind_score, "คะแนนรวมใจความ": mind_total, "bert_score": round(best_score, 3)},
+        "ข้อที่ 1 - ใจความสำคัญ": {"cosine_similarity": round(best_score, 3), **mind_score, "คะแนนรวมใจความ": mind_total,},
         "ข้อที่ 1 - การเรียงลำดับและเชื่อมโยงความคิด": {"score": ordering1_score, "details": ordering1_details},
         "ข้อที่ 1 - ความถูกต้องตามหลักการเขียนย่อความ": {"score": summary1_score, **summary1_details},
         "ข้อที่ 1 - การสะกดคำ": {"score": spelling_score, "details": spelling_res},
