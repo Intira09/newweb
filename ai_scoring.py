@@ -50,7 +50,7 @@ except FileNotFoundError:
     print(f"⚠️ ไม่พบไฟล์: {misspellings_path} (COMMON_MISSPELLINGS ตั้งเป็น empty dict)")
     COMMON_MISSPELLINGS = {}
 
-API_KEY = '33586c7cf5bfa0029887a9831bf94963' # add Apikey
+API_KEY = '' # add Apikey
 API_URL = 'https://api.longdo.com/spell-checker/proof'
 
 custom_words = {"ประเทศไทย", "สถาบันการศึกษา", "นานาประการ"}
